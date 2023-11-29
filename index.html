@@ -139,9 +139,6 @@
       clearButton.classList.add("inactive");
       sendButton.classList.remove("hidden");
 
-      // Создаем уникальное имя для изображения
-      const imageName = `sign_${Date.now()}.png`;
-
       // Преобразуем изображение в base64
       const dataURL = canvas.toDataURL("image/png");
 
@@ -150,11 +147,15 @@
    });
 
    sendButton.addEventListener("click", () => {
-      // Получаем изображение из хранилища
-      const imageData = tg.storage.getItem("signImageData");
+      // Получаем изображение из хранилища в base64
+      const dataURL = tg.storage.getItem("signImageData");
 
-      // Отправляем данные боту
-      tg.sendData(imageData);
+      // Проверяем, есть ли данные
+      if (dataURL) {
+         // Добавьте здесь код для отправки данных, если необходимо
+         // Также, вы можете очистить данные из хранилища после отправки
+         tg.storage.removeItem("signImageData");
+      }
    });
 
    function updateButtonState() {
