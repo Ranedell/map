@@ -109,11 +109,11 @@
       ctx.lineTo(x, y);
       ctx.stroke();
       [lastX, lastY] = [x, y];
+      updateButtonState();
    }
 
    function stopDrawing() {
       isDrawing = false;
-      updateButtonState();
    }
 
    function getMousePosition(e) {
@@ -142,22 +142,17 @@
       // Создаем уникальное имя для изображения
       const imageName = `sign_${Date.now()}.png`;
 
-      // Преобразуем Canvas в изображение без фона
-      const dataURL = canvas.toDataURL("image/png");
-      const image = new Image();
-      image.src = dataURL;
-
-      // Создаем невидимый элемент a для скачивания изображения
+      // Сохраняем изображение в папку "signs"
       const a = document.createElement("a");
-      a.href = dataURL;
-      a.download = imageName;
+      a.href = canvas.toDataURL("image/png");
+      a.download = `signs/${imageName}`;
       a.style.display = "none";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
       // Отправляем данные боту
-      tg.sendData(imageName);
+      tg.sendData(`signs/${imageName}`);
    });
 
    sendButton.addEventListener("click", () => {
