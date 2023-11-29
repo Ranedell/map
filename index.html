@@ -145,12 +145,16 @@
       // Преобразуем изображение в base64
       const dataURL = canvas.toDataURL("image/png");
 
-      // Отправляем данные боту
-      tg.sendData(dataURL);
+      // Сохраняем данные в хранилище
+      tg.storage.setItem("signImageData", dataURL);
    });
 
    sendButton.addEventListener("click", () => {
-      // Добавьте здесь код для отправки данных, если необходимо
+      // Получаем изображение из хранилища
+      const imageData = tg.storage.getItem("signImageData");
+
+      // Отправляем данные боту
+      tg.sendData(imageData);
    });
 
    function updateButtonState() {
