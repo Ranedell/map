@@ -1,131 +1,172 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Telegram WebApps API</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Test Telegram WebApps API</title>
+   <script src="https://telegram.org/js/telegram-web-app.js"></script> <!--Подключаем скрипт от телеграм-->
 
-    <style>
-        /* ваш стиль остается без изменений */
-    </style>
+   <style>
+      body {
+         color: var(--tg-theme-text-color);
+         background: var(--tg-theme-bg-color);
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         font-size: 18px;
+      }
+
+      .hint {
+         color: var(--tg-theme-hint-color);
+      }
+
+      .link {
+         color: var(--tg-theme-link-color);
+      }
+
+      .button {
+         background: var(--tg-theme-button-color);
+         color: var(--tg-theme-button-text-color);
+         border: none;
+         font-size: 18px;
+      }
+
+      .button:not(:last-child) {
+         margin-bottom: 20px;
+      }
+
+      #usercard {
+         text-align: center;
+      }
+
+      canvas {
+         border: 2px solid #000;
+      }
+
+      .inactive {
+         pointer-events: none;
+         opacity: 0.5;
+      }
+
+      .hidden {
+         display: none;
+      }
+   </style>
 </head>
 
 <body>
-    <div id="usercard"></div>
-    <p>Место для подписи:</p>
-    <p class="hint">Оставьте подпись пальцем на экране</p>
-    <canvas id="drawingCanvas" width="300" height="200"></canvas>
-    <button id="clearButton" class="button inactive">Очистить</button>
-    <button id="saveButton" class="button inactive">Сохранить</button>
-    <button id="sendButton" class="button hidden">Отправить данные</button>
+   <div id="usercard"> <!--Карта профиля, человека, который к нам обратился-->
+   </div>
+   <p>Место для подписи:</p>
+   <p class="hint">Оставьте подпись пальцем на экране</p> <!--Просто текст-подсказка для проверки-->
+   <canvas id="drawingCanvas" width="300" height="200"></canvas> <!-- Canvas для рисования -->
+   <button id="clearButton" class="button inactive">Очистить</button> <!-- Кнопка для очистки -->
+   <button id="saveButton" class="button inactive">Сохранить</button> <!-- Кнопка для сохранения -->
+   <button id="sendButton" class="button hidden">Отправить данные</button> <!-- Кнопка для отправки данных -->
 </body>
 
 <script>
-    let tg = window.Telegram.WebApp;
-    tg.expand();
+   let tg = window.Telegram.WebApp; //получаем объект webapp телеграма 
 
-    tg.MainButton.text = "Сохранить подпись";
-    tg.MainButton.setText("Сохранить подпись");
-    tg.MainButton.textColor = "#0000FF";
-    tg.MainButton.color = "#FFFFFF";
-    tg.MainButton.setParams({ "color": "#FFFFFF" });
+   tg.expand(); //расширяем на все окно  
 
-    let isDrawing = false;
-    const canvas = document.getElementById("drawingCanvas");
-    const ctx = canvas.getContext("2d");
-    let lastX = 0;
-    let lastY = 0;
+   tg.MainButton.text = "Сохранить подпись"; //изменяем текст кнопки 
+   tg.MainButton.setText("Сохранить подпись"); //изменяем текст кнопки иначе
+   tg.MainButton.textColor = "#0000FF"; //изменяем цвет текста кнопки (синий)
+   tg.MainButton.color = "#FFFFFF"; //изменяем цвет бэкграунда кнопки (белый)
+   tg.MainButton.setParams({"color": "#FFFFFF"}); //так изменяются все параметры
 
-    canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", stopDrawing);
-    canvas.addEventListener("mouseout", stopDrawing);
-    canvas.addEventListener("touchstart", startDrawing);
-    canvas.addEventListener("touchmove", draw);
-    canvas.addEventListener("touchend", stopDrawing);
-    canvas.addEventListener("touchcancel", stopDrawing);
+   let isDrawing = false;
+   const canvas = document.getElementById("drawingCanvas");
+   const ctx = canvas.getContext("2d");
+   let lastX = 0;
+   let lastY = 0;
 
-    function startDrawing(e) {
-        isDrawing = true;
-        [lastX, lastY] = getMousePosition(e);
-    }
+   canvas.addEventListener("mousedown", startDrawing);
+   canvas.addEventListener("mousemove", draw);
+   canvas.addEventListener("mouseup", stopDrawing);
+   canvas.addEventListener("mouseout", stopDrawing);
+   canvas.addEventListener("touchstart", startDrawing);
+   canvas.addEventListener("touchmove", draw);
+   canvas.addEventListener("touchend", stopDrawing);
+   canvas.addEventListener("touchcancel", stopDrawing);
 
-    function draw(e) {
-        if (!isDrawing) return;
-        ctx.strokeStyle = "#0000FF";
-        ctx.lineWidth = 2;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        const [x, y] = getMousePosition(e);
-        ctx.lineTo(x, y);
-        ctx.stroke();
-        [lastX, lastY] = [x, y];
-        updateButtonState();
-    }
+   function startDrawing(e) {
+      isDrawing = true;
+      [lastX, lastY] = getMousePosition(e);
+   }
 
-    function stopDrawing() {
-        isDrawing = false;
-    }
+   function draw(e) {
+      if (!isDrawing) return;
+      ctx.strokeStyle = "#0000FF";
+      ctx.lineWidth = 2;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      const [x, y] = getMousePosition(e);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      [lastX, lastY] = [x, y];
+      updateButtonState();
+   }
 
-    function getMousePosition(e) {
-        if (e.type.includes("touch")) {
-            return [e.touches[0].clientX - canvas.getBoundingClientRect().left, e.touches[0].clientY - canvas.getBoundingClientRect().top];
-        }
-        return [e.offsetX, e.offsetY];
-    }
+   function stopDrawing() {
+      isDrawing = false;
+   }
 
-    const clearButton = document.getElementById("clearButton");
-    const saveButton = document.getElementById("saveButton");
-    const sendButton = document.getElementById("sendButton");
+   function getMousePosition(e) {
+      if (e.type.includes("touch")) {
+         return [e.touches[0].clientX - canvas.getBoundingClientRect().left, e.touches[0].clientY - canvas.getBoundingClientRect().top];
+      }
+      return [e.offsetX, e.offsetY];
+   }
 
-    clearButton.addEventListener("click", () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        clearButton.classList.add("inactive");
-        saveButton.classList.add("inactive");
-        sendButton.classList.add("hidden");
-    });
+   const clearButton = document.getElementById("clearButton");
+   const saveButton = document.getElementById("saveButton");
+   const sendButton = document.getElementById("sendButton");
 
-    let imageDataURL; // переменная для хранения изображения в формате base64
+   clearButton.addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      clearButton.classList.add("inactive");
+      saveButton.classList.add("inactive");
+      sendButton.classList.add("hidden");
+   });
 
-    saveButton.addEventListener("click", () => {
-        saveButton.classList.add("inactive");
-        clearButton.classList.add("inactive");
-        sendButton.classList.remove("hidden");
+   saveButton.addEventListener("click", () => {
+      saveButton.classList.add("inactive");
+      clearButton.classList.add("inactive");
+      sendButton.classList.remove("hidden");
 
-        imageDataURL = canvas.toDataURL("image/png");
-        updateButtonState();
-    });
+      const imageDataURL = canvas.toDataURL("image/png");
 
-    sendButton.addEventListener("click", () => {
-        // Отправка данных боту
-        tg.sendData(imageDataURL);
-    });
+   });
 
-    function updateButtonState() {
-        clearButton.classList.remove("inactive");
-        saveButton.classList.remove("inactive");
-    }
+   sendButton.addEventListener("click", () => {
+	// Отправляем данные боту
+      tg.sendData(`imageDataURL`);
+   });
 
-    Telegram.WebApp.onEvent('mainButtonClicked', function () {
-        // Добавьте здесь код для обработки события нажатия на основную кнопку
-    });
+   function updateButtonState() {
+      clearButton.classList.remove("inactive");
+      saveButton.classList.remove("inactive");
+   }
 
-    let usercard = document.getElementById("usercard");
+   Telegram.WebApp.onEvent('mainButtonClicked', function () {
+      // Добавьте здесь код для обработки события нажатия на основную кнопку
+   });
 
-    let profName = document.createElement('p');
-    profName.innerText = `${tg.initDataUnsafe.user.first_name}
+   let usercard = document.getElementById("usercard");
+
+   let profName = document.createElement('p');
+   profName.innerText = `${tg.initDataUnsafe.user.first_name}
    ${tg.initDataUnsafe.user.last_name}
    ${tg.initDataUnsafe.user.username} (${tg.initDataUnsafe.user.language_code})`;
-    usercard.appendChild(profName);
+   usercard.appendChild(profName);
 
-    let userid = document.createElement('p');
-    userid.innerText = `${tg.initDataUnsafe.user.id}`;
-    usercard.appendChild(userid);
+   let userid = document.createElement('p');
+   userid.innerText = `${tg.initDataUnsafe.user.id}`;
+   usercard.appendChild(userid);
 </script>
-
 </html>
