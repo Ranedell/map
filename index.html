@@ -62,7 +62,7 @@
    <p class="hint">Оставьте подпись пальцем на экране</p> <!--Просто текст-подсказка для проверки-->
    <canvas id="drawingCanvas" width="300" height="200"></canvas> <!-- Canvas для рисования -->
    <button id="clearButton" class="button inactive">Очистить</button> <!-- Кнопка для очистки -->
-   <button id="saveButton" class="button inactive">Отправить</button> <!-- Кнопка для сохранения -->
+   <button id="saveButton" class="button inactive">Подписать документ</button> <!-- Кнопка для сохранения -->
 </body>
 
 <script>
@@ -139,14 +139,10 @@ saveButton.addEventListener("click", () => {
     ctx.fillStyle = "rgba(0, 0, 0, 0)"; // черный цвет с нулевой прозрачностью
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const imageDataURL = canvas.toDataURL("image/png");
+    imageDataURL = canvas.toDataURL("image/png");  // изменение строки: убрать "const"
     tg.sendData(imageDataURL);
 });
 
-sendButton.addEventListener("click", () => {
-    // Отправляем данные боту
-    tg.sendData(imageDataURL);
-});
 
 function updateButtonState() {
     clearButton.classList.remove("inactive");
