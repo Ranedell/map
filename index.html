@@ -60,13 +60,15 @@
    </div>
    <p>Место для подписи:</p>
    <p class="hint">Оставьте подпись пальцем на экране</p> <!--Просто текст-подсказка для проверки-->
-   <canvas id="drawingCanvas" width="400" height="300"></canvas> <!-- Canvas для рисования -->
+   <canvas id="drawingCanvas" width="350" height="250"></canvas> <!-- Canvas для рисования -->
    <button id="clearButton" class="button inactive">Очистить</button> <!-- Кнопка для очистки -->
-   <button id="saveButton" class="button inactive">Подписать документ</button> <!-- Кнопка для сохранения -->
+   <button id="saveButton" class="button inactive">Сохранить</button> <!-- Кнопка для сохранения -->
+   <button id="sendButton" class="button hidden">Отправить данные</button> <!-- Кнопка для отправки данных -->
 </body>
 
 <script>
    let tg = window.Telegram.WebApp; //получаем объект webapp телеграма 
+   let imageDataURL; // Объявите переменную на уровне, доступном для всего кода
 
    tg.expand(); //расширяем на все окно  
 
@@ -92,61 +94,67 @@
    canvas.addEventListener("touchcancel", stopDrawing);
 
    function startDrawing(e) {
-    isDrawing = true;
-    [lastX, lastY] = getMousePosition(e);
-}
+      isDrawing = true;
+      [lastX, lastY] = getMousePosition(e);
+   }
 
-function draw(e) {
-    if (!isDrawing) return;
-    ctx.strokeStyle = "#0000FF";
-    ctx.lineWidth = 2;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    const [x, y] = getMousePosition(e);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    [lastX, lastY] = [x, y];
-    updateButtonState();
-}
+   function draw(e) {
+      if (!isDrawing) return;
+      ctx.strokeStyle = "#0000FF";
+      ctx.lineWidth = 2;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      const [x, y] = getMousePosition(e);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      [lastX, lastY] = [x, y];
+      updateButtonState();
+   }
 
-function stopDrawing() {
-    isDrawing = false;
-}
+   function stopDrawing() {
+      isDrawing = false;
+   }
 
-function getMousePosition(e) {
-    if (e.type.includes("touch")) {
-        return [e.touches[0].clientX - canvas.getBoundingClientRect().left, e.touches[0].clientY - canvas.getBoundingClientRect().top];
-    }
-    return [e.offsetX, e.offsetY];
-}
+   function getMousePosition(e) {
+      if (e.type.includes("touch")) {
+         return [e.touches[0].clientX - canvas.getBoundingClientRect().left, e.touches[0].clientY - canvas.getBoundingClientRect().top];
+      }
+      return [e.offsetX, e.offsetY];
+   }
 
-clearButton.addEventListener("click", () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    clearButton.classList.add("inactive");
-    saveButton.classList.add("inactive");
-    sendButton.classList.add("hidden");
+   const clearButton = document.getElementById("clearButton");
+   const saveButton = document.getElementById("saveButton");
+   const sendButton = document.getElementById("sendButton");
+
+   clearButton.addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      clearButton.classList.add("inactive");
+      saveButton.classList.add("inactive");
+      sendButton.classList.add("hidden");
+   });
+
+   saveButton.addEventListener("click", () => {
+     saveButton.classList.add("inactive");
+     clearButton.classList.add("inactive");
+     sendButton.classList.remove("hidden");
+
+     imageDataURL = canvas.toDataURL("image/png");
+     tg.sendData(imageDataURL);
 });
 
-saveButton.addEventListener("click", () => {
-    saveButton.classList.add("inactive");
-    clearButton.classList.add("inactive");
-    sendButton.classList.remove("hidden");
 
-    // Устанавливаем фон в прозрачный цвет
-    ctx.fillStyle = "rgba(0, 0, 0, 0)"; // черный цвет с нулевой прозрачностью
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const imageDataURL = canvas.toDataURL("image/png");
+sendButton.addEventListener("click", () => {
+    // Отправляем данные боту
     tg.sendData(imageDataURL);
 });
 
 
-function updateButtonState() {
-    clearButton.classList.remove("inactive");
-    saveButton.classList.remove("inactive");
-}
+   function updateButtonState() {
+      clearButton.classList.remove("inactive");
+      saveButton.classList.remove("inactive"); 
+   }
 
    Telegram.WebApp.onEvent('mainButtonClicked', function () {
       // Добавьте здесь код для обработки события нажатия на основную кнопку
