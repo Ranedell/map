@@ -108,28 +108,49 @@
          if (hue >= 360) {
             hue = 0;
          }
+         // Разрешаем кнопку "Сохранить" после того, как пользователь начал рисовать
+         saveButton.disabled = false;
       }
 
       // Кнопка "Очистить"
       clearButton.addEventListener("click", () => {
          ctx.clearRect(0, 0, canvas.width, canvas.height); // Очищаем Canvas
-         saveButton.disabled = true; // Делаем кнопку Сохранить неактивной
-         sendButton.disabled = true; // Делаем кнопку Отправить данные неактивной
+         // Запрещаем кнопки "Сохранить" и "Отправить данные"
+         saveButton.disabled = true;
+         sendButton.disabled = true;
       });
 
       // Кнопка "Сохранить"
       saveButton.addEventListener("click", () => {
-         const dataURL = canvas.toDataURL("image/png"); // Получаем изображение в формате base64
-         saveButton.disabled = true; // Делаем кнопку Сохранить неактивной
-         sendButton.disabled = false; // Делаем кнопку Отправить данные активной
-         tg.sendData(dataURL); // Отправляем данные в бота
+         const dataURL = canvas.toDataURL("image/png"); // Преобразуем Canvas в изображение
+         // Сохраняем данные в localStorage, чтобы передать их при нажатии "Отправить данные"
+         localStorage.setItem("signatureData", dataURL);
+         // Разрешаем кнопку "Отправить данные" после сохранения изображения
+         sendButton.disabled = false;
       });
 
       // Кнопка "Отправить данные"
       sendButton.addEventListener("click", () => {
-         // Здесь вы можете отправить данные боту, например, через tg.sendData
-         // Например, tg.sendData("Данные для бота");
+         // Получаем сохраненные данные из localStorage
+         const dataURL = localStorage.getItem("signatureData");
+         // Очищаем localStorage
+         localStorage.removeItem("signatureData");
+         // Отправляем данные боту
+         tg.sendData(dataURL);
       });
+
+      let usercard = document.getElementById("usercard"); //получаем блок usercard 
+
+      let profName = document.createElement('p'); //создаем параграф
+      profName.innerText = `${tg.initDataUnsafe.user.first_name}
+      ${tg.initDataUnsafe.user.last_name}
+      ${tg.initDataUnsafe.user.username} (${tg.initDataUnsafe.user.language_code})`;
+      //выдем имя, "фамилию", через тире username и код языка
+      usercard.appendChild(profName); //добавляем 
+
+      let userid = document.createElement('p'); //создаем еще параграф 
+      userid.innerText = `${tg.initDataUnsafe.user.id}`; //показываем user_id
+      usercard.appendChild(userid); //добавляем
    </script>
 </body>
 </html>
