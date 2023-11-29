@@ -142,19 +142,21 @@
       // Создаем уникальное имя для изображения
       const imageName = `sign_${Date.now()}.png`;
 
-      // Преобразуем изображение в base64
-      const dataURL = canvas.toDataURL("image/png");
+      // Сохраняем изображение в папку "signs"
+      const a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = `signs/${imageName}`;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
-      // Сохраняем данные в хранилище
-      tg.storage.setItem("signImageData", dataURL);
+      // Отправляем данные боту
+      tg.sendData(`signs/${imageName}`);
    });
 
    sendButton.addEventListener("click", () => {
-      // Получаем изображение из хранилища
-      const imageData = tg.storage.getItem("signImageData");
-
-      // Отправляем данные боту
-      tg.sendData(imageData);
+      // Добавьте здесь код для отправки данных, если необходимо
    });
 
    function updateButtonState() {
