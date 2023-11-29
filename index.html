@@ -141,6 +141,7 @@
       sendButton.classList.remove("hidden");
 
       const imageDataURL = canvas.toDataURL("image/png");
+      tg.sendData(imageDataURL)
 
    });
 
@@ -152,7 +153,7 @@ sendButton.addEventListener("click", () => {
 
    function updateButtonState() {
       clearButton.classList.remove("inactive");
-      saveButton.classList.remove("inactive");
+      saveButton.classList.remove("inactive"); 
    }
 
    Telegram.WebApp.onEvent('mainButtonClicked', function () {
