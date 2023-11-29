@@ -81,33 +81,30 @@
       // Начальные координаты и цвет линии
       let lastX = 0;
       let lastY = 0;
-      let hue = 0;
 
       // При нажатии на Canvas начинаем рисовать
-      canvas.addEventListener("mousedown", (e) => {
+      canvas.addEventListener("touchstart", (e) => {
          isDrawing = true;
-         [lastX, lastY] = [e.offsetX, e.offsetY];
+         [lastX, lastY] = [e.touches[0].clientX, e.touches[0].clientY];
       });
 
-      // При движении мыши рисуем
-      canvas.addEventListener("mousemove", draw);
+      // При движении пальцем рисуем
+      canvas.addEventListener("touchmove", draw);
 
-      // При отпускании кнопки мыши прекращаем рисовать
-      canvas.addEventListener("mouseup", () => isDrawing = false);
-      canvas.addEventListener("mouseout", () => isDrawing = false);
+      // При отпускании пальца прекращаем рисовать
+      canvas.addEventListener("touchend", () => isDrawing = false);
 
       function draw(e) {
          if (!isDrawing) return; // Прекращаем функцию, если пользователь не рисует
-         ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`; // Устанавливаем цвет линии
+         ctx.strokeStyle = `blue`; // Устанавливаем цвет линии
+         ctx.lineWidth = 5; // Толщина линии
+         ctx.lineJoin = "round";
+         ctx.lineCap = "round";
          ctx.beginPath();
          ctx.moveTo(lastX, lastY); // Перемещаемся к последним координатам
-         ctx.lineTo(e.offsetX, e.offsetY); // Рисуем линию к новым координатам
+         ctx.lineTo(e.touches[0].clientX, e.touches[0].clientY); // Рисуем линию к новым координатам
          ctx.stroke();
-         [lastX, lastY] = [e.offsetX, e.offsetY]; // Обновляем координаты
-         hue++;
-         if (hue >= 360) {
-            hue = 0;
-         }
+         [lastX, lastY] = [e.touches[0].clientX, e.touches[0].clientY]; // Обновляем координаты
          // Разрешаем кнопку "Сохранить" после того, как пользователь начал рисовать
          saveButton.disabled = false;
       }
