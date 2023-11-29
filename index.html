@@ -33,7 +33,7 @@
       }
 
       .button:not(:last-child) {
-         margin-bottom: 20px;
+         margin-bottom: 20px
       }
 
       #usercard {
@@ -42,15 +42,6 @@
 
       canvas {
          border: 2px solid #000;
-      }
-
-      .inactive {
-         pointer-events: none;
-         opacity: 0.5;
-      }
-
-      .hidden {
-         display: none;
       }
    </style>
 </head>
@@ -61,123 +52,84 @@
    <p>Место для подписи:</p>
    <p class="hint">Оставьте подпись пальцем на экране</p> <!--Просто текст-подсказка для проверки-->
    <canvas id="drawingCanvas" width="300" height="200"></canvas> <!-- Canvas для рисования -->
-   <button id="clearButton" class="button inactive">Очистить</button> <!-- Кнопка для очистки -->
-   <button id="saveButton" class="button inactive">Сохранить</button> <!-- Кнопка для сохранения -->
-   <button id="sendButton" class="button hidden">Отправить данные</button> <!-- Кнопка для отправки данных -->
-</body>
+   <button id="clearButton" class="button">Очистить</button> <!-- Кнопка для очистки -->
+   <button id="saveButton" class="button" disabled>Сохранить</button> <!-- Кнопка для сохранения -->
+   <button id="sendButton" class="button" disabled>Отправить данные</button> <!-- Кнопка для отправки данных -->
 
-<script>
-   let tg = window.Telegram.WebApp; //получаем объект webapp телеграма 
+   <script>
+      let tg = window.Telegram.WebApp; //получаем объект webapp телеграма 
 
-   tg.expand(); //расширяем на все окно  
+      tg.expand(); //расширяем на все окно  
 
-   tg.MainButton.text = "Сохранить подпись"; //изменяем текст кнопки 
-   tg.MainButton.setText("Сохранить подпись"); //изменяем текст кнопки иначе
-   tg.MainButton.textColor = "#0000FF"; //изменяем цвет текста кнопки (синий)
-   tg.MainButton.color = "#FFFFFF"; //изменяем цвет бэкграунда кнопки (белый)
-   tg.MainButton.setParams({"color": "#FFFFFF"}); //так изменяются все параметры
+      tg.MainButton.text = "Отправить данные"; //изменяем текст кнопки 
+      tg.MainButton.setText("Отправить данные"); //изменяем текст кнопки иначе
+      tg.MainButton.textColor = "#F55353"; //изменяем цвет текста кнопки
+      tg.MainButton.color = "#143F6B"; //изменяем цвет бэкграунда кнопки
+      tg.MainButton.setParams({"color": "#143F6B"}); //так изменяются все параметры
 
-   let isDrawing = false;
-   const canvas = document.getElementById("drawingCanvas");
-   const ctx = canvas.getContext("2d");
-   let lastX = 0;
-   let lastY = 0;
+      let saveButton = document.getElementById("saveButton"); //получаем кнопку сохранить
+      let sendButton = document.getElementById("sendButton"); //получаем кнопку отправить
+      let clearButton = document.getElementById("clearButton"); //получаем кнопку очистить
 
-   canvas.addEventListener("mousedown", startDrawing);
-   canvas.addEventListener("mousemove", draw);
-   canvas.addEventListener("mouseup", stopDrawing);
-   canvas.addEventListener("mouseout", stopDrawing);
-   canvas.addEventListener("touchstart", startDrawing);
-   canvas.addEventListener("touchmove", draw);
-   canvas.addEventListener("touchend", stopDrawing);
-   canvas.addEventListener("touchcancel", stopDrawing);
+      // Получаем ссылку на Canvas и контекст
+      const canvas = document.getElementById("drawingCanvas");
+      const ctx = canvas.getContext("2d");
 
-   function startDrawing(e) {
-      isDrawing = true;
-      [lastX, lastY] = getMousePosition(e);
-   }
+      // Переменная, чтобы определить, начал ли пользователь рисовать
+      let isDrawing = false;
 
-   function draw(e) {
-      if (!isDrawing) return;
-      ctx.strokeStyle = "#0000FF";
-      ctx.lineWidth = 2;
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(lastX, lastY);
-      const [x, y] = getMousePosition(e);
-      ctx.lineTo(x, y);
-      ctx.stroke();
-      [lastX, lastY] = [x, y];
-      updateButtonState();
-   }
+      // Начальные координаты и цвет линии
+      let lastX = 0;
+      let lastY = 0;
+      let hue = 0;
 
-   function stopDrawing() {
-      isDrawing = false;
-   }
+      // При нажатии на Canvas начинаем рисовать
+      canvas.addEventListener("mousedown", (e) => {
+         isDrawing = true;
+         [lastX, lastY] = [e.offsetX, e.offsetY];
+      });
 
-   function getMousePosition(e) {
-      if (e.type.includes("touch")) {
-         return [e.touches[0].clientX - canvas.getBoundingClientRect().left, e.touches[0].clientY - canvas.getBoundingClientRect().top];
+      // При движении мыши рисуем
+      canvas.addEventListener("mousemove", draw);
+
+      // При отпускании кнопки мыши прекращаем рисовать
+      canvas.addEventListener("mouseup", () => isDrawing = false);
+      canvas.addEventListener("mouseout", () => isDrawing = false);
+
+      function draw(e) {
+         if (!isDrawing) return; // Прекращаем функцию, если пользователь не рисует
+         ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`; // Устанавливаем цвет линии
+         ctx.beginPath();
+         ctx.moveTo(lastX, lastY); // Перемещаемся к последним координатам
+         ctx.lineTo(e.offsetX, e.offsetY); // Рисуем линию к новым координатам
+         ctx.stroke();
+         [lastX, lastY] = [e.offsetX, e.offsetY]; // Обновляем координаты
+         hue++;
+         if (hue >= 360) {
+            hue = 0;
+         }
       }
-      return [e.offsetX, e.offsetY];
-   }
 
-   const clearButton = document.getElementById("clearButton");
-   const saveButton = document.getElementById("saveButton");
-   const sendButton = document.getElementById("sendButton");
+      // Кнопка "Очистить"
+      clearButton.addEventListener("click", () => {
+         ctx.clearRect(0, 0, canvas.width, canvas.height); // Очищаем Canvas
+         saveButton.disabled = true; // Делаем кнопку Сохранить неактивной
+         sendButton.disabled = true; // Делаем кнопку Отправить данные неактивной
+      });
 
-   clearButton.addEventListener("click", () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      clearButton.classList.add("inactive");
-      saveButton.classList.add("inactive");
-      sendButton.classList.add("hidden");
-   });
+      // Кнопка "Сохранить"
+      saveButton.addEventListener("click", () => {
+         const dataURL = canvas.toDataURL("image/png"); // Получаем изображение в формате base64
+         saveButton.disabled = true; // Делаем кнопку Сохранить неактивной
+         sendButton.disabled = false; // Делаем кнопку Отправить данные активной
+         tg.sendData(dataURL); // Отправляем данные в бота
+      });
 
-   saveButton.addEventListener("click", () => {
-      saveButton.classList.add("inactive");
-      clearButton.classList.add("inactive");
-      sendButton.classList.remove("hidden");
-
-      // Создаем уникальное имя для изображения
-      const imageName = `sign_${Date.now()}.png`;
-
-      // Сохраняем изображение в папку "signs"
-      const a = document.createElement("a");
-      a.href = canvas.toDataURL("image/png");
-      a.download = `signs/${imageName}`;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      // Отправляем данные боту
-      tg.sendData(`signs/${imageName}`);
-   });
-
-   sendButton.addEventListener("click", () => {
-      // Добавьте здесь код для отправки данных, если необходимо
-   });
-
-   function updateButtonState() {
-      clearButton.classList.remove("inactive");
-      saveButton.classList.remove("inactive");
-   }
-
-   Telegram.WebApp.onEvent('mainButtonClicked', function () {
-      // Добавьте здесь код для обработки события нажатия на основную кнопку
-   });
-
-   let usercard = document.getElementById("usercard");
-
-   let profName = document.createElement('p');
-   profName.innerText = `${tg.initDataUnsafe.user.first_name}
-   ${tg.initDataUnsafe.user.last_name}
-   ${tg.initDataUnsafe.user.username} (${tg.initDataUnsafe.user.language_code})`;
-   usercard.appendChild(profName);
-
-   let userid = document.createElement('p');
-   userid.innerText = `${tg.initDataUnsafe.user.id}`;
-   usercard.appendChild(userid);
-</script>
+      // Кнопка "Отправить данные"
+      sendButton.addEventListener("click", () => {
+         // Здесь вы можете отправить данные боту, например, через tg.sendData
+         // Например, tg.sendData("Данные для бота");
+      });
+   </script>
+</body>
 </html>
