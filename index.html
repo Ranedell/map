@@ -144,10 +144,11 @@
 
    });
 
-   sendButton.addEventListener("click", () => {
-	// Отправляем данные боту
-      tg.sendData(`imageDataURL`);
-   });
+sendButton.addEventListener("click", () => {
+    // Отправляем данные боту
+    tg.sendData(imageDataURL);
+});
+
 
    function updateButtonState() {
       clearButton.classList.remove("inactive");
